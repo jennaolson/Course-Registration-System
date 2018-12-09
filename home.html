@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+
+	<head>
+		<title> Course Registration System </title>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<!-- our stylesheet -->
+		<link rel="stylesheet" href="style.css"/>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>		
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<script src="script.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+	</head>
+	
+	<body onload="Init()">
+	    <div id="app">
+		<h1>Course Registration System</h1>
+		<h2 id="header">University of St. Thomas</h2></br>
+		<div id="box">
+			<p> Username: <input type="text" id="username"/> <br/> </p>
+			<p> Password: <input type="text" id="password"/> <br/> </p>
+			<button type="button" onclick="fullPage()"/> Create New User </button>
+			<button type="button" onclick="logIn()"/> Log In </button>
+		</div>
+		
+		<div id="new">
+			<p> First Name: <input type="text" id="firstName"/> <br/> </p>
+			<p> Last Name: <input type="text" id="lastName"/> <br/> </p>
+			<p> Username: <input type="text" id="new_username"/> <br/> </p>
+			<p> Password: <input type="text" id="new_password"/> <br/> </p>
+			<p> Category:
+				<select id="position">
+					<option id="student" value="Student">Student</option>
+					<option id="faculty" value="Faculty">Faculty</option>
+				</select>
+			</p>			
+			<button type="button"  id="createUser" onclick="newUser()"/> Create User </button>
+		</div>
+	    
+		<div id="searchBox">
+			
+		        <h1 id="header">Search Page<h1>
+		
+       			<h3>Departments: </h3>
+        		<div v-for="depts in departments">
+                		<input type="checkbox" class="checkboxes" v-bind:id="depts+''" />
+                		<span>{{depts}}</span>
+        		</div>
+        		<!--<input type="checkbox" id="departments" v-for="test in departments">{{test}}</in -->
+        		<h3>Course Number (Optional): </h3> <input type="text" id="course_number"></input>
+        		<h3>CRN (Optional): </h3> <input type="text" id="crn"></input></br></br>
+
+        		<button type="button" id="search" onclick="search()">Search</button></br>
+
+			<p class="error" id="alreadyRegistered">You have already registered for this course.</p>
+
+       			<div id="additionalInfo">
+	                	<p id="course_description"></p>
+        		</div>
+
+				<table id="courseTable" border="1">
+                		<tr>
+                        		<th>Subject</th>
+                        		<th>Course Number</th>
+                        		<th>Course Section</th>
+		                        <th>Course Name</th>
+                		        <th>Building</th>
+		                        <th>Room</th>
+                		        <th>Professors</th>
+		                        <th>Credits</th>
+                		        <th>CRN</th>
+                        		<th>Capacity</th>
+                        		<th>Waitlist Count</th>
+                		</tr>
+
+                		<tr v-for="course in courses">
+                       			<td> {{course.subject}} </td>
+                        		<td> {{course.course_number}} </td>
+		                        <td> {{course.section_number}} </td>
+                		        <td> {{course.name}} </td>
+		                        <td> {{course.building}} </td>
+                		        <td> {{course.room}} </td>
+		                        <td> {{course.professors}} </td>
+                		        <td> {{course.credits}} </td>
+		                        <td> {{course.crn}} </td>
+                		        <td> {{course.capacity}} </td>
+		                        <td> {{course.waitlist_count}} </td>
+                		</tr>
+
+		</div>	
+
+
+		</div>
+	
+	</body>
+
+</html>
