@@ -22,7 +22,7 @@ var db = new sqlite3.Database(path.join(__dirname, 'db', 'course_db.sqlite3'),  
 db.serialize(() => {
 	db.run("CREATE TABLE IF NOT EXISTS Departments (subject TEXT, full_name TEXT, PRIMARY KEY (subject))");
 	db.run("CREATE TABLE IF NOT EXISTS Courses (subject TEXT, course_number TEXT, credits INTEGER, name TEXT, description TEXT, PRIMARY KEY (subject, course_number))");
-	db.run("CREATE TABLE IF NOT EXISTS Sections (crn INTEGER, subject TEXT, course_number TEXT, section_number TEXT, building TEXT, room TEXT, professors TEXT, times TEXT, capacity INTEGER, registered TEXT, PRIMARY KEY (crn))");
+	db.run("CREATE TABLE IF NOT EXISTS Sections (crn INTEGER, subject TEXT, course_number TEXT, section_number TEXT, building TEXT, room TEXT, professors TEXT, times TEXT, capacity INTEGER, registered TEXT, waitlist_count TEXT, PRIMARY KEY (crn))");
 	db.run("CREATE TABLE IF NOT EXISTS People (university_id INTEGER, position TEXT, password TEXT, first_name TEXT, last_name TEXT, registered_courses TEXT, PRIMARY KEY (university_id))");
 
 	// Common Variables
@@ -61,7 +61,7 @@ db.serialize(() => {
                 			htmlDoc = parser.parseFromString(response.data);
 
 					var stmtCourses = db.prepare("INSERT INTO Courses VALUES (?, ?, ?, ?, ?)");
-					var stmtSections = db.prepare("INSERT INTO Sections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+					var stmtSections = db.prepare("INSERT INTO Sections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
 					var query = htmlDoc.getElementById('queryString');
 					var subject = query.getAttribute('value').substring(query.getAttribute('value').length - 4, query.getAttribute('value').length);
@@ -185,7 +185,7 @@ db.serialize(() => {
 
 					// Add sections to table
 					for (var course = 0; course < course_numbers.length; course++) {
-						stmtSections.run(crns[course], subject, course_numbers[course], section_numbers[course], buildings[course], rooms[course], professors[course], course_times[course], capacities[course], null);
+						stmtSections.run(crns[course], subject, course_numbers[course], section_numbers[course], buildings[course], rooms[course], professors[course], course_times[course], capacities[course], 'null', 0);
 					}
 					stmtSections.finalize();
                 	});
