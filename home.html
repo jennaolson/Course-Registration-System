@@ -17,10 +17,16 @@
 	
 	<body onload="Init()">
 	    <div id="app">
-		<a href="about.html">About the Project</a>
+		<div id="navigation">
+                	<ul class="navigation">
+                                <li class="navigation"> <a class="navigation" href="home.html"> Home </a>
+                                <li class="navigation"> <a class="navigation" href="about.html"> About the Project </a>
+                                <li class="navigation"> <a class="navigation" href="difference.html"> Differences </a>
+                        </ul>
+                </div>
 
-		<h1>Course Registration System</h1>
-		<h2 id="header">University of St. Thomas</h2></br>
+		<h1 class="title">Course Registration System</h1>
+		<h2 class="title" style="padding: 10px; font-size: 2rem;">University of St. Thomas</h2></br>
 		<p class="error" id="invalidLogin">Invalid login credentials.</p>
 		<p class="error" id="NaN">Please enter a valid university ID number.</p>
 		<div class="loader" id="html-spinner"></div>
@@ -57,11 +63,20 @@
 		<div id="scheduleInfo">
 			<h2>Schedule</h2>
 			<button type="button" id="returnToProfile" onclick="goToProfile()">Return to Profile</button>
-			<div id="popSchedule" v-for="course in user.courses">
-				<p>Course: {{course.crn}}</p>
-				<p>Times: {{course.times}}</p></br>
-				<button type="button" id="scheduleDrop" onclick="dropFromSchedule()">Drop</button>
-			</div>
+			<div id="scheduleInfo" v-for="course in user.courses">
+                                <br/>
+                                <table id="schedule">
+                                        <tr>
+                                                <td> Course: {{course.subject}} {{course.course_number}} {{course.section_number}} </td>
+                                        </tr>
+                                        <tr>
+                                                <td> Times: {{course.times}} </td>
+                                        </tr>
+                                        <tr>
+                                                <td> <button type="button" id="scheduleDrop" onclick="dropFromSchedule()"> Drop </button> </td>
+                                        </tr>
+                                </table>
+                        </div>
 		</div>
 
 		<div id="viewWishlist">
@@ -76,10 +91,10 @@
 		        <h1 id="header">Search Page<h1>
 		
        			<h3>Departments: </h3>
-        		<div v-for="depts in departments">
-                		<input type="checkbox" class="checkboxes" v-bind:id="depts+''" />
-                		<span>{{depts}}</span>
-        		</div>
+        		<div v-for="depts in departments" style="display: inline-block; margin: 5px;">
+                                <input type="checkbox" class="checkboxes" v-bind:id="depts+''" />
+                                <span>{{depts}}</span>
+                        </div>
         		<!--<input type="checkbox" id="departments" v-for="test in departments">{{test}}</in -->
         		<h3>Course Number (Optional): </h3> <input type="text" id="course_number"></input>
         		<h3>CRN (Optional): </h3> <input type="text" id="crn"></input></br></br>
