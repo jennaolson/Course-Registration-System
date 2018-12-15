@@ -317,7 +317,7 @@ app.post('/getSchedule', (req, res) => {
 
 		for (var j = 0; j < courses.length; j++) {
 			promises.push(new Promise(function(resolve, reject) {
-				var sql = 'SELECT crn, times FROM Sections where crn="' + courses[j] + '"';
+				var sql = 'SELECT subject, course_number, section_number, crn, times FROM Sections where crn="' + courses[j] + '"';
 				db.all(sql, [], (err, rows) => {
 					if (err) {
 						throw err;
