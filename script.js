@@ -259,15 +259,21 @@ function search() {
 console.log('info when choosing button: ' + course.registered);
 console.log('ID: ' + app.user.university_id);
 				if (app.user.position == 'Student' && course.registered != null && !course.registered.includes(app.user.university_id)) {
-					additionalInfo = additionalInfo + '<button type="button" id="register" onclick="register(' + course.crn + ',' + course.capacity + ',' + '\'' + course.registered + '\'' + ',\'false\'' + ',' + course.waitlist_count + ')">Register</button></td></tr>';
-				} else if (app.user.position == 'Student' && course.registered.includes(app.user.university_id)) {
-					additionalInfo = additionalInfo + '<button type="button" id="drop" onclick="register(' + course.crn + ',' + course.capacity + ',\'' + course.registered + '\',true' + ',' + course.waitlist_count + ')">Drop</button></td></tr>';
-				} else if (app.user.position.trim() == 'Faculty'){
-					additionalInfo = additionalInfo + '<button type="button" id="roster" onclick="roster(' + course.crn + ')">Roster</button></td></tr>';
-				} else {
-					console.log('something is wrong: ' + app.user.position);
-					additionalInfo = additionalInfo + '</td></tr>';
-				}
+                                        additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="register" onclick="register(' + course.crn + ',' + course.capacity + ',' + '\'' + course.registered + '\'' + ',\'false\'' + ',' + course.waitlist_count + ')">Register</button>';
+                                        additionalInfo = additionalInfo + '<div> <p> <b> Course Description: </b>' + course.description + '</p></div>';
+                                        additionalInfo = additionalInfo + '<p> <b> Times: </b>' + course.times  + '</p> </td></tr>';
+                                } else if (app.user.position == 'Student' && course.registered.includes(app.user.university_id)) {
+                                        additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="drop" onclick="register(' + course.crn + ',' + course.capacity + ',\'' + course.registered + '\',true' + ',' + course.waitlist_count + ')">Drop</button>';
+                                        additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
+                                        additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
+                                } else if (app.user.position.trim() == 'Faculty'){
+                                        additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="roster" onclick="roster(' + course.crn + ')">Roster</button>';
+                                        additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
+                                        additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
+                                } else {
+                                        console.log('something is wrong: ' + app.user.position);
+                                        additionalInfo = additionalInfo + '</td></tr>';
+                                }
 
 				$(additionalInfo).insertAfter(this);
 			}
