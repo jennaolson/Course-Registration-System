@@ -11,8 +11,13 @@ var mime = require('mime-types');
 var WebSocket = require('ws');
 
 var app = express();
-var port = 8018;
+var port = 8017;
 var public_dir = path.join(__dirname, 'public');
+
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
+server.listen(port);
+
 
 const bodyParser = require('body-parser')
 
@@ -25,10 +30,10 @@ var db = new sqlite3.Database(path.join(__dirname, 'db', 'course_db.sqlite3'),  
     }
 });
 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-  extended: true
-}))
+	extended: true
+}));
 
 app.use(express.static(public_dir));
 
@@ -97,13 +102,13 @@ app.post('/searchData', (req, res) => {
 	    promises.push(new Promise(function(resolve, reject) {
 		var theCourses = []
 		if (req.body.course_number === '' && req.body.crn === '') {
-			getCourses = 'SELECT Sections.waitlist_count, Sections.subject, Sections.course_number, Sections.section_number, Sections.building, Sections.room, Sections.professors, Sections.crn, Sections.capacity, Courses.name, Courses.credits, Courses.description, Sections.times, Sections.registered FROM Sections LEFT OUTER JOIN Courses ON Courses.course_number = Sections.course_number WHERE Sections.subject = "' + req.body.departments[i].substring(0, 4) + '"';
+			getCourses = 'SELECT Sections.waitlist_count, Sections.subject, Sections.course_number, Sections.section_number, Sections.building, Sections.room, Sections.professors, Sections.crn, Sections.capacity, Courses.name, Courses.credits, Courses.description, Sections.times, Sections.registered FROM Sections INNER JOIN Courses ON Courses.course_number = Sections.course_number WHERE Sections.subject = "' + req.body.departments[i].substring(0, 4) + '" and Courses.subject = "' + req.body.departments[i].substring(0, 4) + '"';
 		} else if (req.body.crn === '') {
-			getCourses = 'SELECT Sections.waitlist_count, Sections.subject, Sections.course_number, Sections.section_number, Sections.building, Sections.room, Sections.professors, Sections.crn, Sections.capacity, Courses.name, Courses.credits, Courses.description, Sections.times, Sections.registered/*, Sections.waitlist_count*/ FROM Sections LEFT OUTER JOIN Courses ON Courses.course_number = Sections.course_number WHERE Sections.course_number = "' + req.body.course_number + '" AND Sections.subject = "' + req.body.departments[i].substring(0, 4) + '"';
+			getCourses = 'SELECT Sections.waitlist_count, Sections.subject, Sections.course_number, Sections.section_number, Sections.building, Sections.room, Sections.professors, Sections.crn, Sections.capacity, Courses.name, Courses.credits, Courses.description, Sections.times, Sections.registered FROM Sections INNER JOIN Courses ON Courses.course_number = Sections.course_number WHERE Sections.course_number = "' + req.body.course_number + '" AND Sections.subject = "' + req.body.departments[i].substring(0, 4) + '" and Courses.subject = "' + req.body.departments[i].substring(0, 4) + '"';
 		} else if (req.body.course_number === '') {
-			getCourses = 'SELECT Sections.waitlist_count, Sections.subject, Sections.course_number, Sections.section_number, Sections.building, Sections.room, Sections.professors, Sections.crn, Sections.capacity, Courses.name, Courses.credits, Courses.description, Sections.times, Sections.registered /*, Sections.waitlist_count*/ FROM Sections LEFT OUTER JOIN Courses ON Courses.course_number = Sections.course_number WHERE Sections.crn = "' + req.body.crn + '" AND Sections.subject = "' + req.body.departments[i].substring(0, 4) + '"';
+			getCourses = 'SELECT Sections.waitlist_count, Sections.subject, Sections.course_number, Sections.section_number, Sections.building, Sections.room, Sections.professors, Sections.crn, Sections.capacity, Courses.name, Courses.credits, Courses.description, Sections.times, Sections.registered FROM Sections INNER JOIN Courses ON Courses.course_number = Sections.course_number WHERE Sections.crn = "' + req.body.crn + '" AND Sections.subject = "' + req.body.departments[i].substring(0, 4) + '" and Courses.subject = "' + req.body.departments[i].substring(0, 4) + '"';
 		} else {
-			getCourses = 'SELECT Sections.waitlist_count, Sections.subject, Sections.course_number, Sections.section_number, Sections.building, Sections.room, Sections.professors, Sections.crn, Sections.capacity, Courses.name, Courses.credits, Courses.description, Sections.times, Sections.registered /*, Sections.waitlist_count*/ FROM Sections LEFT OUTER JOIN Courses ON Courses.course_number = Sections.course_number WHERE Sections.course_number = "' + req.body.course_number + '" AND Sections.crn = "' + req.body.crn + '" AND Sections.subject = "' + req.body.departments[i].substring(0, 4) + '"';
+			getCourses = 'SELECT Sections.waitlist_count, Sections.subject, Sections.course_number, Sections.section_number, Sections.building, Sections.room, Sections.professors, Sections.crn, Sections.capacity, Courses.name, Courses.credits, Courses.description, Sections.times, Sections.registered FROM Sections INNER JOIN Courses ON Courses.course_number = Sections.course_number WHERE Sections.course_number = "' + req.body.course_number + '" AND Sections.crn = "' + req.body.crn + '" AND Sections.subject = "' + req.body.departments[i].substring(0, 4) + '" and Courses.subject = "' + req.body.departments[i].substring(0, 4) + '"';
 		}
 
 		db.all(getCourses, [], (err, rows) => {
@@ -149,7 +154,6 @@ app.post('/register', (req, res) => {
 	var promise2 = new Promise(function(resolve, reject) {
 		var regCourses = '';
 		var getRegistered = 'SELECT registered, times from Sections WHERE crn="' + crn + '"';
-
 		db.all(getRegistered, [], (err, rows) => {
 			if (err) {
 				throw err;
@@ -215,19 +219,22 @@ app.post('/register', (req, res) => {
 								newSplit.push(split[i]);
 							}
 						}
+						console.log(newSplit);
 						if (newSplit.length >= capacity) {
+							console.log(newSplit.length);
 							registeredString = registeredString + ',W' + crn;
 							registeredCourses = registeredCourses + ',W' + username;
 							db.run('UPDATE Sections SET waitlist_count="' + (waitlist_count + 1) + '" WHERE crn="' + crn + '"');
 							db.run('UPDATE Sections SET registered="' + registeredCourses + '" WHERE crn = "' + crn + '"');
+							db.run('UPDATE People SET registered_courses="' + registeredString + '" WHERE university_id = "' + username + '"');
+							res.send('waitlisted');
 						} else {
 							registeredString = registeredString + ',' + crn;
 	        	        		        registeredCourses = registeredCourses + ',' + username;
 							db.run('UPDATE Sections SET registered="' + registeredCourses + '" WHERE crn = "' + crn + '"');
+							db.run('UPDATE People SET registered_courses="' + registeredString + '" WHERE university_id = "' + username + '"');
+							res.send('updated');
 						}
-						db.run('UPDATE People SET registered_courses="' + registeredString + '" WHERE university_id = "' + username + '"');
-
-						res.send('updated');
 					}
 				} else {
 					// wanna remove extra commas? alter the addition of the splits here
@@ -255,7 +262,6 @@ app.post('/register', (req, res) => {
 		});
 	});
 });
-
 
 app.post('/roster', (req, res) => {
 	var sql = 'SELECT registered FROM Sections WHERE crn="' + req.body.crn + '"';
@@ -297,10 +303,12 @@ app.post('/getSchedule', (req, res) => {
 		var courses = [];
 		var courseInfo = [];
 		let promises = [];
+		var waitlisted = [];
 		for (var i = 0; i < split.length; i++) {
 			if (split[i] != '' && split[i] != 'null') {
 				if (split[i].includes('W')) {
 					courses.push(split[i].substring(1));
+					waitlisted.push(parseInt(split[i].substring(1)));
 				} else {
 					courses.push(split[i]);
 				}
@@ -315,6 +323,9 @@ app.post('/getSchedule', (req, res) => {
 						throw err;
 					}
 					rows.forEach((row) => {
+						if (waitlisted.includes(row.crn)) {
+							row.crn = 'W' + row.crn;
+						}
 						courseInfo.push(row);
 					});
 					resolve(courseInfo);
@@ -329,7 +340,31 @@ app.post('/getSchedule', (req, res) => {
 	});
 });
 
-app.listen(port, () => {
-    console.log('Now listening on port ' + port);
+//app.listen(port, () => {
+//    console.log('Now listening on port ' + port);
+//});
+
+//https://socket.io/docs/
+
+io.on('connection', function (socket) {
+	console.log('socktes console.log');
+	socket.emit('updateRegistered', 'sockets!!!');
 });
 
+
+/*
+ioserver = io(server);
+var num_clients = 0;
+ioserver.on('connection', (client) => {
+        num_clients++;
+        ioserver.emit('UpdateClientCount', num_clients);
+        client.on('disconnect', () => {
+                num_clients--;
+                ioserver.emit('UpdateClientCount', num_clients);
+        });
+        client.on('ChatMessage', (message) => {
+                ioserver.emit('ChatMessage', message);
+        })
+});
+
+*/
