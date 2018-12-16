@@ -427,8 +427,16 @@ function roster(crn) {
 		if (registered.includes('null')) {
 			registered = registered.substring(5);
 		}
-		registered = registered.replace(/(^,)|(,$)/g, "");
-		alert('Students registered for this course: ' + registered);
+
+		var split = registered.split(',');
+		var filtered = [];
+		for (var i = 0; i < split.length; i++) {
+			if (split[i] != '' && !split[i].includes('undefined')) {
+				filtered.push(split[i]);
+			}
+		}
+
+		alert('Students registered for this course: ' + filtered);
 	}).catch(err => {
                 console.log(err);
         });
