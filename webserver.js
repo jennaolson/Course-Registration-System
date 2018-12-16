@@ -208,8 +208,6 @@ app.post('/register', (req, res) => {
 			} else {
 
 				if (drop == false || drop == 'false') {
-console.log(registeredString);
-console.log(crn);
 		        		if (registeredString.includes(crn)) {
 						res.send('error');
         				} else {
