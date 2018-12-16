@@ -171,7 +171,6 @@ app.post('/register', (req, res) => {
 		registeredCourses = result[1].registered;
 		times = result[1].times;
 
-
 		// GET ALL REGISTERED TIMES
         	var split = registeredString.split(',');
                 var courses = [];
@@ -351,8 +350,8 @@ io.on('connection', function (socket) {
 	socket.emit('updateRegistered', 'sockets!!!');
 });
 
-
 /*
+
 ioserver = io(server);
 var num_clients = 0;
 ioserver.on('connection', (client) => {

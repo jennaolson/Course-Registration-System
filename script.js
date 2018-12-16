@@ -12,7 +12,7 @@ function Init() {
 				position: 'test',
 				courses: [],
 			},
-			tempRegistered = '',
+			tempRegistered: '',
 		},
 		methods: {
         	    populateDepartments: function (depts) {
@@ -136,6 +136,7 @@ function logIn() {
 		var el = $('div:contains("' + crn + '")');
 		console.log(el);
 	});
+
         /*socket.on('UpdateClientCount', (data) => {
                 var client_count = document.getElementById('client_count');
                 client_count.textContent = 'Number of clients: ' + data;
@@ -151,7 +152,6 @@ function logIn() {
 }
 
 function search() {
-
 	$('#loader').css('display', 'block');
         setTimeout(stopLoading, 1000);
 
@@ -215,7 +215,6 @@ function search() {
 				var crn = $(row).find('td')[8].innerHTML;
 				var university_id = app.user.university_id;
 				var course = '';
-
 				for (var i = 0; i < app.courses.length; i++) {
                                 	if (app.courses[i].crn == crn) {
                                         	course = app.courses[i];
@@ -231,52 +230,119 @@ function search() {
 		});
 
 		$('#courseTable tr').click(function() {
-			var error = document.getElementById('alreadyRegistered');
-                        error.style.visibility = 'hidden';
-			$('#timeConflict').css('visibility', 'hidden');
+			// THIS CODE IS POTENTIALLY GOING TO FIX A BAD BUG, DO NOT DELETE.
+			// I am going to ask Marrinan about it on Monday.
 
-                	var additionalInfo = '';
-			additionalInfo = additionalInfo + '';
-			var crn = ($(this).find('td')[8].innerHTML);
-			var course;
+			/*const promise = new Promise(function(resolve, reject) {
+			        app.courses = [];
 
-                        for (var i = 0; i < app.courses.length; i++) {
-                                if (app.courses[i].crn == crn) {
-                                        course = app.courses[i];
-                                }
-                        }
+        			var departments = [];
+       				var course_number = $('#course_number').val();
+       				var crn = $('#crn').val();
 
-			if ($('#addInfo').length > 0) {
-				$('#addInfo').remove();
-			} else {
-				additionalInfo = '<tr id="addInfo"><td colspan="12"><div> <p>Course Description</p> <p>' + course.description + '</p></div>';
-				additionalInfo = additionalInfo + '<p>' + course.times  + '</p>';
+  				var checkedBoxes = document.querySelectorAll('input[class=checkboxes]:checked');
+    				checkedBoxes.forEach((node) => {
+                			departments.push(node.id);
+        			});
 
-				if (course.registered == null) {
-					course.registered = 'null';
-				}
+        			axios.post('/searchData', {
+               				departments: departments,
+              				course_number: course_number,
+          				crn: crn
+				}).then((res) => {
+                			for (var i = 0; i < res.data.length; i++) {
+                       				for (var j = 0; j < res.data[i].length; j++) {
 
+                           				// Calculate registered Count
+                                			var split = res.data[i][j].registered.split(',');
+                               				var courses = [];
+                             				for (var k = 0; k < split.length; k++) {
+                                        				if (split[k] != '' && split[k] != 'null') {
+                                                				if (split[k].includes('W')) {
+                                                        				courses.push(split[k].substring(1));
+                                                				} else {
+                                                        				courses.push(split[k]);
+                                                				}
+                                        				}
+                                			}
+
+                               				var registeredCount = courses.length;
+
+			                                app.courses.push({
+                                      				subject: res.data[i][j].subject,
+                                      				course_number: res.data[i][j].course_number,
+                                       				section_number: res.data[i][j].section_number,
+                                    				name: res.data[i][j].name,
+                                       				building: res.data[i][j].building,
+                                       				room: res.data[i][j].room,
+                                        			professors: res.data[i][j].professors,
+                                        			credits: res.data[i][j].credits,
+                                        			crn: res.data[i][j].crn,
+                                        			capacity: res.data[i][j].capacity,
+                                        			description: res.data[i][j].description,
+                                        			times: res.data[i][j].times,
+                                        			registered: res.data[i][j].registered,
+                                        			registeredCount: registeredCount,
+                                        			waitlist_count: res.data[i][j].waitlist_count,
+                                			});
+                        			}
+                			}
+
+					resolve('promise success');
+        			});
+			});
+
+                	promise.then((res) => {*/
+console.log(app.courses);
+				var error = document.getElementById('alreadyRegistered');
+                        	error.style.visibility = 'hidden';
+				$('#timeConflict').css('visibility', 'hidden');
+
+                		var additionalInfo = '';
+				additionalInfo = additionalInfo + '';
+				var crn = ($(this).find('td')[8].innerHTML);
+				var course;
+
+                        	for (var i = 0; i < app.courses.length; i++) {
+                                	if (app.courses[i].crn == crn) {
+                                        	course = app.courses[i];
+                                	}
+                        	}
+
+				if ($('#addInfo').length > 0) {
+					$('#addInfo').remove();
+				} else {
+					additionalInfo = '<tr id="addInfo"><td colspan="12"><div> <p>Course Description</p> <p>' + course.description + '</p></div>';
+					additionalInfo = additionalInfo + '<p>' + course.times  + '</p>';
+
+					if (course.registered == null) {
+						course.registered = 'null';
+					}
 console.log('info when choosing button: ' + course.registered);
-console.log('ID: ' + app.user.university_id);
-				if (app.user.position == 'Student' && course.registered != null && !course.registered.includes(app.user.university_id)) {
-                                        additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="register" onclick="register(' + course.crn + ',' + course.capacity + ',' + '\'' + course.registered + '\'' + ',\'false\'' + ',' + course.waitlist_count + ')">Register</button>';
-                                        additionalInfo = additionalInfo + '<div> <p> <b> Course Description: </b>' + course.description + '</p></div>';
-                                        additionalInfo = additionalInfo + '<p> <b> Times: </b>' + course.times  + '</p> </td></tr>';
-                                } else if (app.user.position == 'Student' && course.registered.includes(app.user.university_id)) {
-                                        additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="drop" onclick="register(' + course.crn + ',' + course.capacity + ',\'' + course.registered + '\',true' + ',' + course.waitlist_count + ')">Drop</button>';
-                                        additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
-                                        additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
-                                } else if (app.user.position.trim() == 'Faculty'){
-                                        additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="roster" onclick="roster(' + course.crn + ')">Roster</button>';
-                                        additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
-                                        additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
-                                } else {
-                                        console.log('something is wrong: ' + app.user.position);
-                                        additionalInfo = additionalInfo + '</td></tr>';
-                                }
+					if (app.user.position == 'Student' && course.registered != null && !course.registered.includes(app.user.university_id)) {
+						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="register" onclick="register(' + course.crn + ',' + course.capacity + ',' + '\'' + course.registered + '\'' + ',\'false\'' + ',' + course.waitlist_count + ')">Register</button>';
+                                        	additionalInfo = additionalInfo + '<div> <p> <b> Course Description: </b>' + course.description + '</p></div>';
+                                        	additionalInfo = additionalInfo + '<p> <b> Times: </b>' + course.times  + '</p> </td></tr>';
+					} else if (app.user.position == 'Student' && course.registered.includes(app.user.university_id)) {
+						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="drop" onclick="register(' + course.crn + ',' + course.capacity + ',\'' + course.registered + '\',true' + ',' + course.waitlist_count + ')">Drop</button>';
+	                                        additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
+        	                                additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
+					} else if (app.user.position.trim() == 'Faculty'){
+						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="roster" onclick="roster(' + course.crn + ')">Roster</button>';
+	                                        additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
+        	                                additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
+					} else {
+						console.log('something is wrong: ' + app.user.position);
+						additionalInfo = additionalInfo + '</td></tr>';
+					}
 
-				$(additionalInfo).insertAfter(this);
-			}
+console.log('about to add this: ' + additionalInfo);
+					$(additionalInfo).insertAfter(this);
+console.log('added.');
+				}
+			//}).catch((err) => {
+				//console.log(err);
+			//});
        		});
 
 	}).catch(err => {
@@ -287,7 +353,7 @@ console.log('ID: ' + app.user.university_id);
 }
 
 function register(crn, capacity, registered, drop, waitlist_count) {
-	console.log('USERID: ' + app.user.university_id);
+	console.log('Registering.');
 	axios.post('/register', {
 		university_id: app.user.university_id,
 		crn: crn,
@@ -296,58 +362,55 @@ function register(crn, capacity, registered, drop, waitlist_count) {
 		drop: drop,
 		waitlist_count: waitlist_count,
 	}).then((res) => {
-		var registered = '';
-		if (res.data == 'error') {
-			var error = document.getElementById('alreadyRegistered');
-                        error.style.visibility = 'visible';
-		} else if (res.data == 'updated' || res.data == 'waitlisted') {
-			var drop =  '<button type="button" id="drop" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'true\'' + ',' + waitlist_count + ')">Drop</button></td></tr>';
-			$('#register').replaceWith(drop);
-		} else if (res.data == 'dropped') {
-			var register = '<button type="button" id="register" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'false\'' + ',' + waitlist_count + ')">Register</button></td></tr>';
-			$('#drop').replaceWith(register);
-		} else if (res.data == 'timeConflict') {
-			$('#timeConflict').css('visibility', 'visible');
-		} else {
-			//console.log(res.data);
-		}
+			if (res.data == 'error') {
+				var error = document.getElementById('alreadyRegistered');
+                	        error.style.visibility = 'visible';
+			} else if (res.data == 'updated' || res.data == 'waitlisted') {
+				var drop =  '<button type="button" id="drop" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'true\'' + ',' + waitlist_count + ')">Drop</button></td></tr>';
+				$('#register').replaceWith(drop);
+			} else if (res.data == 'dropped') {
+				var register = '<button type="button" id="register" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'false\'' + ',' + waitlist_count + ')">Register</button></td></tr>';
+				$('#drop').replaceWith(register);
+			} else if (res.data == 'timeConflict') {
+				$('#timeConflict').css('visibility', 'visible');
+			} else {}
 
-		// Update colors?
-		$('#courseTable tr').each((index, row) => {
-                        if (index != 0) {
-			    if ($(row).find('td').length === 12) {
-                                var newcrn = $(row).find('td')[8].innerHTML;
-                                var university_id = app.user.university_id;
-                                var course = '';
+			// Update colors
+			$('#courseTable tr').each((index, row) => {
+				if (index != 0) {
+			    		if ($(row).find('td').length === 12) {
+                                		var newcrn = $(row).find('td')[8].innerHTML;
+                                		var university_id = app.user.university_id;
+                                		var course = '';
 
-                                for (var i = 0; i < app.courses.length; i++) {
-                                        if (app.courses[i].crn == newcrn) {
-                                                course = app.courses[i];
-                                        }
-                                }
-console.log(res.data);
-console.log(crn + ' ' + newcrn);
+                                		for (var i = 0; i < app.courses.length; i++) {
+                                        		if (app.courses[i].crn == newcrn) {
+                                                		course = app.courses[i];
+                                        		}
+                                		}
+
+console.log('RES.DATA: ' + res.data);
 console.log('course-registered: ' + course.registered);
-                                if (course.registered.includes('W' + university_id)) {
-                                        row.style.backgroundColor = 'yellow';
-                                } else if (crn == newcrn && res.data == 'updated') {
-					row.style.backgroundColor = 'green';
-				/*} else if (course.registered != null && course.registered.includes(university_id)) {
-                                        row.style.backgroundColor = 'green';
-                                	console.log('recolored'); */
-				} else if (crn == newcrn && res.data == 'dropped') {
-					row.style.backgroundColor = '#f2f2f2';
-				} else if (crn == newcrn && res.data == 'waitlisted') {
-					row.style.backgroundColor = 'yellow';
-				} else if (course.registered.includes(university_id)) {
-					row.style.backgroundColor = 'green';
-				} else {
-					row.style.backgroundColor = '#f2f2f2';
-				}
-			    }
-                        }
-                });
-
+						if (course.registered.includes('W' + university_id)) {
+                                        		row.style.backgroundColor = 'yellow';
+                                		} else if (crn == newcrn && res.data == 'updated') {
+							row.style.backgroundColor = 'green';
+						/*} else if (course.registered != null && course.registered.includes(university_id)) {
+                                        		row.style.backgroundColor = 'green';
+                                			console.log('recolored'); */
+						} else if (crn == newcrn && res.data == 'dropped') {
+							row.style.backgroundColor = '#f2f2f2';
+						} else if (crn == newcrn && res.data == 'waitlisted') {
+							row.style.backgroundColor = 'yellow';
+						} else if (course.registered.includes(university_id)) {
+							row.style.backgroundColor = 'green';
+						} else {
+console.log('colored to gray');
+							row.style.backgroundColor = '#f2f2f2';
+						}
+			    		}
+                        	}
+                	});
 	}).catch(err => {
                 console.log(err);
         });
@@ -423,4 +486,71 @@ function dropFromSchedule(crn) {
 		var drop = '<button type="button" id="scheduleDrop" onclick="dropFromSchedule()">Drop</button>';
 		$('#scheduleRegister').replaceWith(drop)
 	}
+}
+
+// Not currently used, but do NOT delete
+async function updateCourses() {
+console.log('Updating courses... ');
+	app.courses = [];
+
+        var departments = [];
+        var course_number = $('#course_number').val();
+        var crn = $('#crn').val();
+
+        var checkedBoxes = document.querySelectorAll('input[class=checkboxes]:checked');
+        checkedBoxes.forEach((node) => {
+                departments.push(node.id);
+        });
+
+	axios.post('/searchData', {
+                departments: departments,
+                course_number: course_number,
+                crn: crn
+        }).then((res) => {
+                for (var i = 0; i < res.data.length; i++) {
+                        for (var j = 0; j < res.data[i].length; j++) {
+
+                                // Calculate registered Count
+                                var split = res.data[i][j].registered.split(',');
+                                var courses = [];
+                                for (var k = 0; k < split.length; k++) {
+                                        if (split[k] != '' && split[k] != 'null') {
+                                                if (split[k].includes('W')) {
+                                                        courses.push(split[k].substring(1));
+                                                } else {
+                                                        courses.push(split[k]);
+                                                }
+                                        }
+                                }
+
+                                var registeredCount = courses.length;
+                                console.log(courses.length);
+
+                                app.courses.push({
+                                        subject: res.data[i][j].subject,
+                                        course_number: res.data[i][j].course_number,
+                                        section_number: res.data[i][j].section_number,
+                                        name: res.data[i][j].name,
+                                        building: res.data[i][j].building,
+                                        room: res.data[i][j].room,
+                                        professors: res.data[i][j].professors,
+                                        credits: res.data[i][j].credits,
+                                        crn: res.data[i][j].crn,
+                                        capacity: res.data[i][j].capacity,
+                                        description: res.data[i][j].description,
+                                        times: res.data[i][j].times,
+                                        registered: res.data[i][j].registered,
+                                        registeredCount: registeredCount,
+                                        waitlist_count: res.data[i][j].waitlist_count,
+                                });
+                        }
+                }
+
+console.log('app.courses in FUNCTION: ' + app.courses);
+console.log(typeof app.courses);
+
+	});
+
+console.log('updated courses!');
+
 }
