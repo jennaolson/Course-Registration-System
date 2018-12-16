@@ -208,6 +208,8 @@ app.post('/register', (req, res) => {
 			} else {
 
 				if (drop == false || drop == 'false') {
+console.log(registeredString);
+console.log(crn);
 		        		if (registeredString.includes(crn)) {
 						res.send('error');
         				} else {
@@ -218,7 +220,6 @@ app.post('/register', (req, res) => {
 								newSplit.push(split[i]);
 							}
 						}
-						console.log(newSplit);
 						if (newSplit.length >= capacity) {
 							console.log(newSplit.length);
 							registeredString = registeredString + ',W' + crn;
@@ -339,6 +340,33 @@ app.post('/getSchedule', (req, res) => {
 	});
 });
 
+app.post('/getWishlistData', (req, res) => {
+	var crns = req.body.crns;
+	var promises = [];
+	var courseInfo = [];
+
+	for (var i = 0; i < crns.length; i++) {
+		promises.push(new Promise(function(resolve, reject) {
+			var sql = 'SELECT crn, capacity, registered, waitlist_count FROM Sections WHERE crn=' + crns[i];
+                        db.all(sql, [], (err, rows) => {
+                               	if (err) {
+                                	throw err;
+                                }
+                                rows.forEach((row) => {
+                                	courseInfo.push(row);
+                                });
+                                resolve(courseInfo);
+                        });
+                }));
+	}
+
+	Promise.all(promises).then(function(values) {
+        	res.send(values);
+        });
+
+});
+
+
 //app.listen(port, () => {
 //    console.log('Now listening on port ' + port);
 //});
@@ -367,3 +395,4 @@ ioserver.on('connection', (client) => {
 });
 
 */
+

@@ -11,8 +11,8 @@ function Init() {
 				university_id: 'test',
 				position: 'test',
 				courses: [],
+				wishlist: [],
 			},
-			tempRegistered: '',
 		},
 		methods: {
         	    populateDepartments: function (depts) {
@@ -23,7 +23,10 @@ function Init() {
         	    },
 		    updateUser(position) {
 			this.user.position = position;
-		    }
+		    },
+		    updateWishlist: function (crn) {
+			this.user.wishlist.push(crn);
+		    },
 		}
 	});
 
@@ -293,7 +296,7 @@ function search() {
 			});
 
                 	promise.then((res) => {*/
-console.log(app.courses);
+//console.log(app.courses);
 				var error = document.getElementById('alreadyRegistered');
                         	error.style.visibility = 'hidden';
 				$('#timeConflict').css('visibility', 'hidden');
@@ -320,7 +323,7 @@ console.log(app.courses);
 					}
 console.log('info when choosing button: ' + course.registered);
 					if (app.user.position == 'Student' && course.registered != null && !course.registered.includes(app.user.university_id)) {
-						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="register" onclick="register(' + course.crn + ',' + course.capacity + ',' + '\'' + course.registered + '\'' + ',\'false\'' + ',' + course.waitlist_count + ')">Register</button>';
+						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="register" onclick="register(' + course.crn + ',' + course.capacity + ',' + '\'' + course.registered + '\'' + ',\'false\'' + ',' + course.waitlist_count + ')">Register</button></br><button type="button" onclick="addToWishlist(' + course.crn + ')">Add to Wishlist</button>';
                                         	additionalInfo = additionalInfo + '<div> <p> <b> Course Description: </b>' + course.description + '</p></div>';
                                         	additionalInfo = additionalInfo + '<p> <b> Times: </b>' + course.times  + '</p> </td></tr>';
 					} else if (app.user.position == 'Student' && course.registered.includes(app.user.university_id)) {
@@ -476,6 +479,25 @@ function viewSchedule() {
 function viewWishlist() {
 	$('#viewWishlist').css('display', 'block');
 	$('#profile').css('display', 'none');
+}
+
+function addToWishlist(crn) {
+	app.updateWishlist(crn);
+};
+
+function registerForAllWishlist() {
+	var crns = app.user.wishlist;
+
+	axios.post('getWishlistData', {
+		crns: crns,
+	}).then((res) => {
+		var courses = res.data;
+		for (var i = 0; i < courses.length; i++) {
+			register(res.data[0][i].crn, res.data[0][i].capacity, res.data[0][i].registered, false, res.data[0][i].waitlist_count);
+		}
+	}).catch((err) => {
+		console.log(err);
+	});
 }
 
 function dropFromSchedule(crn) {
