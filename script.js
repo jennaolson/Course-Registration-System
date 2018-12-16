@@ -508,13 +508,13 @@ function registerForAllWishlist() {
 	});
 }
 
-function dropFromSchedule(crn) {
-	if ($('#scheduleDrop').length) {
-		var register = '<button type="button" id="scheduleRegister" onclick="dropFromSchedule()">Register</button>';
-		$('#scheduleDrop').replaceWith(register);
-	} else if ($('#scheduleRegister').length){
-		var drop = '<button type="button" id="scheduleDrop" onclick="dropFromSchedule()">Drop</button>';
-		$('#scheduleRegister').replaceWith(drop)
+function dropFromSchedule(el) {
+	if (el.innerHTML.trim() === 'Drop') {
+		var register = '<button type="button" id="scheduleRegister" onclick="dropFromSchedule(this)">Register</button>';
+		$(el).replaceWith(register);
+	} else if (el.innerHTML.trim() === 'Register'){
+		var drop = '<button type="button" id="scheduleDrop" onclick="dropFromSchedule(this)">Drop</button>';
+		$(el).replaceWith(drop)
 	}
 }
 
