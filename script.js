@@ -1,3 +1,5 @@
+
+
 var app;
 var socket;
 
@@ -28,7 +30,9 @@ function Init() {
 			this.user.position = position;
 		    },
 		    updateWishlist: function (crn) {
-			this.user.wishlist.push(crn);
+			if (!this.user.wishlist.includes(crn)) {
+				this.user.wishlist.push(crn);
+			}
 		    },
 		}
 	});
@@ -290,8 +294,12 @@ function search() {
 	}).catch(err => {
 		console.log(err);
 	});
-
-	//socket.emit('updateRegistered', crn);
+//	console.log('emitting updateRegistered');
+/*	socket.emit('updateRegistered', {
+		crn: crn,
+		course_number: course_number,
+		departments: departments
+	}); */
 }
 
 function register(crn, capacity, registered, drop, waitlist_count, otherID) {
@@ -406,11 +414,11 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
                 	});
 	}).catch(err => {
                 console.log(err);
+		console.log(err.message);
         });
 }
 
 function findCourseByCrn(crn) {
-	console.log('in find function');
 	var course;
 	for (var i = 0; i < app.courses.length; i++) {
 		if (app.courses[i].crn === crn) {

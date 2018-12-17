@@ -83,12 +83,12 @@
 		<div id="viewWishlist" style="visibility: hidden; display: none;">
 			<h2>Wishlist</h2>
 			<button type="button" id="returnToProfile" onclick="goToProfile()">Return to Profile</button>
-           		<button type="button" id="registerAllWishlist" onclick="registerForAllWishlist()">Register for All</button>
-           		<p>Courses Currently on your Wishlist:</p>
+			<p>Courses Currently on your Wishlist:</p>
 			<div id="wishlistTable" v-for="crn in user.wishlist">
 				<p> Course: {{crn}} </p>
-        		</div>
-        	</div>
+			</div>
+			<button type="button" id="registerAllWishlist" onclick="registerForAllWishlist()">Register for All</button>
+		</div>
 		
 		<div id="searchBox">
 

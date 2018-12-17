@@ -129,7 +129,6 @@ app.post('/searchData', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-console.log((typeof req.body.otherID) == 'undefined');
 	if ((typeof req.body.otherID) == 'undefined') {
 		var username = req.body.university_id;
 	} else {
@@ -142,7 +141,6 @@ console.log((typeof req.body.otherID) == 'undefined');
 	var waitlist_count = req.body.waitlist_count;
 	var drop = req.body.drop;
 	var registeredString = '';
-
 	var promise = new Promise(function(resolve, reject) {
 		var regString = '';
 		var getStudentRow = 'SELECT registered_courses FROM People WHERE university_id="' + username + '"';
@@ -171,7 +169,6 @@ console.log((typeof req.body.otherID) == 'undefined');
 		});
 
 	});
-
 	Promise.all([promise, promise2]).then(function (result) {
 		registeredString = result[0];
 		registeredCourses = result[1].registered;
@@ -249,16 +246,15 @@ console.log((typeof req.body.otherID) == 'undefined');
         		                                        var index2 = split2.indexOf('W' + username);
 	                	                                registeredCourses = split2.slice(0, index2) + split2.slice(index2 + 1, split2.length);
 
-							{
+							}
 							registeredCourses = registeredCourses + ',' + username;
 
 							db.run('UPDATE Sections SET registered="' + registeredCourses + '" WHERE crn = "' + crn + '"');
 							db.run('UPDATE People SET registered_courses="' + registeredString + '" WHERE university_id = "' + username + '"');
 							res.send('updated');
 						}
-					}}}
+					}
 				} else {
-					// wanna remove extra commas? alter the addition of the splits here
 					if (registeredCourses.includes('W' + username)) {
 						var split1 = registeredCourses.split(',');
 						var index1 = split1.indexOf('W' + username);
@@ -399,8 +395,11 @@ app.post('/getWishlistData', (req, res) => {
 //https://socket.io/docs/
 
 io.on('connection', function (socket) {
-	console.log('socktes console.log');
-	socket.emit('updateRegistered', 'sockets!!!');
+	console.log('sockets console.log');
+/*	socket.on('updateRegistered', (data) => {
+		console.log(data);
+	});*/
+	//socket.emit('updateRegistered', 'sockets!!!');
 });
 
 /*
