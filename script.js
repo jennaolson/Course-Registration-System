@@ -484,7 +484,7 @@ function goToSearch() {
 }
 
 function viewSchedule() {
-	$('#scheduleInfo').css('display', 'block');
+	$('#scheduleInfo').css({'display': 'block', 'visibility': 'visible'});
 	$('#profile').css('display', 'none');
 
 	axios.post('/getSchedule', {
@@ -509,7 +509,7 @@ function viewSchedule() {
 }
 
 function viewWishlist() {
-	$('#viewWishlist').css('display', 'block');
+	$('#viewWishlist').css({'display': 'block', 'visibility': 'visible'});
 	$('#profile').css('display', 'none');
 }
 
