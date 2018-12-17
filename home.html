@@ -61,7 +61,7 @@
 			<button type="button" id="goToSearch" onclick="goToSearch()">Go to Search</button>
 		</div>
 
-		<div id="scheduleInfo">
+		<div id="scheduleInfo" style="visibility: hidden; display: none;">
 			<h2>Schedule</h2>
 			<button type="button" id="returnToProfile" onclick="goToProfile()">Return to Profile</button>
 			<div id="scheduleInfoTable" v-for="course in user.courses">
@@ -80,15 +80,15 @@
                         </div>
 		</div>
 
-		<div id="viewWishlist">
+		<div id="viewWishlist" style="visibility: hidden; display: none;">
 			<h2>Wishlist</h2>
 			<button type="button" id="returnToProfile" onclick="goToProfile()">Return to Profile</button>
-			<p>Courses Currently on your Wishlist:</p>
+           		<button type="button" id="registerAllWishlist" onclick="registerForAllWishlist()">Register for All</button>
+           		<p>Courses Currently on your Wishlist:</p>
 			<div id="wishlistTable" v-for="crn in user.wishlist">
 				<p> Course: {{crn}} </p>
-			</div>
-			<button type="button" id="registerAllWishlist" onclick="registerForAllWishlist()">Register for All</button>
-		</div>
+        		</div>
+        	</div>
 		
 		<div id="searchBox">
 
