@@ -12,8 +12,9 @@ function Init() {
 				position: 'test',
 				courses: [],
 				wishlist: [],
-				tempRegistered: [1],
+				tempRegistered: [],
 				tempDropped: [],
+				tempWaitlisted: [],
 			},
 		},
 		methods: {
@@ -262,7 +263,7 @@ function search() {
 						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="register" onclick="register(' + course.crn + ',' + course.capacity + ',' + '\'' + course.registered + '\'' + ',\'false\'' + ',' + course.waitlist_count + ')">Register</button></br><button type="button" onclick="addToWishlist(' + course.crn + ')">Add to Wishlist</button>';
 						additionalInfo = additionalInfo + '<div> <p> <b> Course Description: </b>' + course.description + '</p></div>';
                                                 additionalInfo = additionalInfo + '<p> <b> Times: </b>' + course.times  + '</p> </td></tr>';
-					} else if (app.user.position == 'Student' && app.user.tempRegistered.includes(parseInt(crn))) {
+					} else if (app.user.position == 'Student' && (app.user.tempRegistered.includes(parseInt(crn)) || app.user.tempWaitlisted.includes(parseInt(crn)))) {
 						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="drop" onclick="register(' + course.crn + ',' + course.capacity + ',\'' + course.registered + '\',true' + ',' + course.waitlist_count + ')">Drop</button>';
 						additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
                                                 additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
@@ -303,27 +304,45 @@ function register(crn, capacity, registered, drop, waitlist_count) {
 		drop: drop,
 		waitlist_count: waitlist_count,
 	}).then((res) => {
+			var theCourse = findCourseByCrn(crn);
 			if (res.data == 'error') {
 				var error = document.getElementById('alreadyRegistered');
                 	        error.style.visibility = 'visible';
-			} else if (res.data == 'updated' || res.data == 'waitlisted') {
+			} else if (res.data == 'updated') {
 				var drop =  '<button type="button" id="drop" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'true\'' + ',' + waitlist_count + ')">Drop</button></td></tr>';
 				$('#register').replaceWith(drop);
 				if (app.user.tempDropped.includes(crn)) {
                                         app.user.tempDropped.splice(app.user.tempDropped.indexOf(crn), 1);
                                 }
 				app.user.tempRegistered.push(crn);
+				theCourse.registeredCount = theCourse.registeredCount + 1;
+			} else if (res.data == 'waitlisted') {
+				var drop =  '<button type="button" id="drop" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'true\'' + ',' + waitlist_count + ')">Drop</button></td></tr>';
+				$('#register').replaceWith(drop);
+				if (app.user.tempDropped.includes(crn)) {
+                                        app.user.tempDropped.splice(app.user.tempDropped.indexOf(crn), 1);
+                                }
+                                app.user.tempWaitlisted.push(crn);
+				theCourse.waitlist_count = parseInt(theCourse.waitlist_count) + 1;
+
 			} else if (res.data == 'dropped') {
 				var register = '<button type="button" id="register" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'false\'' + ',' + waitlist_count + ')">Register</button></td></tr>';
 				$('#drop').replaceWith(register);
 				if (app.user.tempRegistered.includes(crn)) {
 					app.user.tempRegistered.splice(app.user.tempRegistered.indexOf(crn), 1);
+					theCourse.registeredCount = theCourse.registeredCount - 1;
+				} else if (app.user.tempWaitlisted.includes(parseInt(crn))) {
+					app.user.tempWaitlisted.splice(app.user.tempWaitlisted.indexOf(crn), 1);
+					theCourse.waitlist_count = parseInt(theCourse.waitlist_count) - 1;
+				} else if (theCourse.registered.includes('W' + app.user.university_id)) {
+					theCourse.waitlist_count = parseInt(theCourse.waitlist_count) - 1;
+				} else {
+					theCourse.registeredCount = theCourse.registeredCount - 1;
 				}
 				app.user.tempDropped.push(crn);
 			} else if (res.data == 'timeConflict') {
 				$('#timeConflict').css('visibility', 'visible');
 			} else {}
-
 
 			// Update colors
 			$('#courseTable tr').each((index, row) => {
@@ -347,6 +366,8 @@ function register(crn, capacity, registered, drop, waitlist_count) {
 							row.style.backgroundColor = 'green';
 						} else if (app.user.tempDropped.includes(parseInt(newcrn))) {
 							row.style.backgroundColor = '#f2f2f2';
+						} else if (app.user.tempWaitlisted.includes(parseInt(newcrn))) {
+							row.style.backgroundColor = 'yellow';
 						} else if (crn == newcrn && res.data == 'dropped') {
 							row.style.backgroundColor = '#f2f2f2';
 						} else if (crn == newcrn && res.data == 'waitlisted') {
@@ -365,10 +386,14 @@ function register(crn, capacity, registered, drop, waitlist_count) {
 }
 
 function findCourseByCrn(crn) {
+	console.log('in find function');
 	var course;
 	for (var i = 0; i < app.courses.length; i++) {
-		if (app.course.crn == crn) {
-			return course;
+		console.log(app.courses[i]);
+		console.log(app.courses[i].crn);
+		console.log(crn);
+		if (app.courses[i].crn === crn) {
+			return app.courses[i];
 		}
 	}
 }
