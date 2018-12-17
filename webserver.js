@@ -129,7 +129,13 @@ app.post('/searchData', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-	var username = req.body.university_id;
+console.log((typeof req.body.otherID) == 'undefined');
+	if ((typeof req.body.otherID) == 'undefined') {
+		var username = req.body.university_id;
+	} else {
+		var username = req.body.otherID;
+	}
+
 	var crn = req.body.crn;
 	var capacity = req.body.capacity;
 	var registered = req.body.registered;
@@ -179,7 +185,7 @@ app.post('/register', (req, res) => {
                 for (var i = 0; i < split.length; i++) {
                        	if (split[i] != '' && split[i] != 'null') {
                                	if (split[i].includes('W')) {
-                                       	courses.push(split[i].substring(1));
+                                       	//courses.push(split[i].substring(1));
                                	} else {
                                        	courses.push(split[i]);
                                	}
@@ -202,24 +208,28 @@ app.post('/register', (req, res) => {
                    	}));
                 }
 
+
+
                 Promise.all(promises).then(function(values) {
-			if (values.length > 0 && values[0].indexOf(times) != -1 && (drop == false || drop == 'false')) {
+			if (values.length > 0 && values[0].indexOf(times) != -1 && (drop == false || drop == 'false') && (!registered.includes('W' + username))) {
 				res.send('timeConflict');
 			} else {
-
 				if (drop == false || drop == 'false') {
-		        		if (registeredString.includes(crn)) {
+					var split3 = registeredString.split(',');
+                                        var index3 = split3.indexOf('W' + crn);
+                                        registeredString = split3.slice(0, index3) + split3.slice(index3 + 1, split3.length);
+
+		        		if (registeredString.includes(crn) && !registeredString.includes('W' + crn)) {
 						res.send('error');
         				} else {
 						var split = registeredCourses.split(',');
 						var newSplit = [];
 						for (var i = 0; i < split.length; i++) {
-							if (split[i] != '' && split[i] != 'null') {
+							if (split[i] != '' && split[i] != 'null' && !split[i].includes('undefined') && !split[i].includes('W')) {
 								newSplit.push(split[i]);
 							}
 						}
 						if (newSplit.length >= capacity) {
-							console.log(newSplit.length);
 							registeredString = registeredString + ',W' + crn;
 							registeredCourses = registeredCourses + ',W' + username;
 							db.run('UPDATE Sections SET waitlist_count="' + (waitlist_count + 1) + '" WHERE crn="' + crn + '"');
@@ -227,28 +237,45 @@ app.post('/register', (req, res) => {
 							db.run('UPDATE People SET registered_courses="' + registeredString + '" WHERE university_id = "' + username + '"');
 							res.send('waitlisted');
 						} else {
+							if (registeredString.includes('W' + crn)) {
+								var split1 = registeredString.split(',');
+		                                                var index1 = split1.indexOf('W' + crn);
+                		                                registeredString = split1.slice(0, index1) + split1.slice(index1 + 1, split1.length);
+							}
 							registeredString = registeredString + ',' + crn;
-	        	        		        registeredCourses = registeredCourses + ',' + username;
+
+							if (registeredCourses.includes('W' + username)) {
+								var split2 = registeredCourses.split(',');
+        		                                        var index2 = split2.indexOf('W' + username);
+	                	                                registeredCourses = split2.slice(0, index2) + split2.slice(index2 + 1, split2.length);
+
+							{
+							registeredCourses = registeredCourses + ',' + username;
+
 							db.run('UPDATE Sections SET registered="' + registeredCourses + '" WHERE crn = "' + crn + '"');
 							db.run('UPDATE People SET registered_courses="' + registeredString + '" WHERE university_id = "' + username + '"');
 							res.send('updated');
 						}
-					}
+					}}}
 				} else {
 					// wanna remove extra commas? alter the addition of the splits here
 					if (registeredCourses.includes('W' + username)) {
-						var splitC = registeredCourses.split('W' + username);
-		                	        registeredCourses = splitC[0] + splitC[1];
+						var split1 = registeredCourses.split(',');
+						var index1 = split1.indexOf('W' + username);
+						registeredCourses = split1.slice(0, index1) + split1.slice(index1 + 1, split1.length);
 					} else {
-						var splitC = registeredCourses.split(username);
-	        		                registeredCourses = splitC[0] + splitC[1];
+						var split2 = registeredCourses.split(',');
+                                                var index2 = split2.indexOf('' + username + '');
+                                                registeredCourses = split2.slice(0, index2) + split2.slice(index2 + 1, split2.length);
 					}
 					if (registeredString.includes('W' + crn)) {
-						var splitS = registeredString.split('W' + crn);
-	        		                registeredString = splitS[0] + splitS[1];
+						var split3 = registeredString.split(',');
+                                                var index3 = split3.indexOf('W' + crn);
+                                                registeredString = split3.slice(0, index3) + split3.slice(index3 + 1, split3.length);
 					} else {
-						var splitS = registeredString.split(crn);
-						registeredString = splitS[0] + splitS[1];
+						var split4 = registeredString.split(',');
+                                                var index4 = split4.indexOf('' + crn + '');
+                                                registeredString = split4.slice(0, index4) + split4.slice(index4 + 1, split4.length);
 					}
 
 					db.run('UPDATE Sections SET registered="' + registeredCourses + '" WHERE crn = "' + crn + '"');
