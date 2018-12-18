@@ -484,11 +484,13 @@ function goToProfile() {
 	$('#profile').css('display', 'block');
 	$('#scheduleInfo').css('display', 'none');
 	$('#viewWishlist').css('display', 'none');
+	$('#courseTable').css('display', 'none');
 }
 
 function goToSearch() {
 	$('#profile').css('display', 'none');
 	$('#searchBox').css('visibility', 'visible');
+	$('#courseTable').css('display', 'block');
 }
 
 function viewSchedule() {
