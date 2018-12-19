@@ -38,6 +38,22 @@ table {
 	width:100%;
 }
 
+#mainBody img {
+	padding:1px;
+  	border: 1px solid #000000;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	float: right;
+	margin-left: 80px;
+	margin-bottom: 40px;
+}
+
+.innerDivs {
+	text-align: center;
+	display: inline-block;	
+	padding-bottom: 50px;
+	margin-top: 50px;
+}
+
 #usernameError {
 	font-size: 50%;
 	color: red;
@@ -49,8 +65,25 @@ table {
 	visibility: hidden;
 }
 
-#notification {
+#mainBody {
+	padding-left: 80px;
+	padding-right: 80px;
+}
 
+#mainBody p {
+	font-size: 150%;
+    	top: 50%;
+    	left: 50%;
+	padding-right: 50px;
+	vertical-align: center;
+}
+
+#weirdImage {
+	margin-bottom: 80px;
+}
+
+#mainBody h3 {
+	font-size: 200%;
 }
 
 .pics {
