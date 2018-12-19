@@ -49,9 +49,7 @@ console.log('user: ' + req.body.username + typeof req.body.username);
 		res.send('false');
 	} else {
 		var sql = 'SELECT * FROM People WHERE university_id="' + req.body.username + '"';
-console.log(sql);
 		db.all(sql, [], (err, rows) => {
-console.log('rows: ' + rows + ' ' + rows.length);
 			if (err) {
 				throw err;
 			}
@@ -245,7 +243,9 @@ app.post('/register', (req, res) => {
 							if (registeredCourses.includes('W' + username)) {
 								var split2 = registeredCourses.split(',');
         		                                        var index2 = split2.indexOf('W' + username);
+console.log('regCourses before split: ' + registeredCourses);
 	                	                                registeredCourses = split2.slice(0, index2) + split2.slice(index2 + 1, split2.length);
+console.log('regCourses after split: ' + registeredCourses);
 
 							}
 							registeredCourses = registeredCourses + ',' + username;

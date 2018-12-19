@@ -155,15 +155,15 @@ function logIn() {
 	});
 
 	socket.on('notifyRegistered', (data) => {
-		var el = $('div:contains("' + data.crn + '")');
-                el.css('background-color', 'green');
+		//var el = $('td:contains("' + data.crn + '")').parent();
+		//el.css('background-color', 'green');
 
-		var notification = '<p id="notification">You have been moved from the waitlist to registered for course: ' + 'data.crn' + '!</p>'
-		$('#ust').append(notification);
+		var notification = '<p id="notification">' + app.user.university_id + ' has been moved from the waitlist to registered for course: ' + 'data.crn' + '!</p>'
+		$('#invalidLogin').append(notification);
 
 		setTimeout(function () {
         		$('#notification').hide();
-    		}, 2000);
+    		}, 10000);
         });
 
         /*socket.on('UpdateClientCount', (data) => {
@@ -248,10 +248,11 @@ function search() {
                                         	course = app.courses[i];
                                 	}
                         	}
-				if (course.registered.includes('W' + university_id)) {
+				var littleStr = 'W' + university_id;
+				if (includesString(littleStr, course.registered)) {
 					row.style.backgroundColor = 'yellow';
 				}
-				else if (course.registered != null && course.registered.includes(university_id)) {
+				else if (course.registered != null && includesString(university_id, course.registered)) {
 					row.style.backgroundColor = 'green';
 				}
 			}
@@ -289,11 +290,11 @@ function search() {
 						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="drop" onclick="register(' + course.crn + ',' + course.capacity + ',\'' + course.registered + '\',true' + ',' + course.waitlist_count + ')">Drop</button>';
 						additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
                                                 additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
-					} else if (app.user.position == 'Student' && (course.registered != null && !course.registered.includes(app.user.university_id) || app.user.tempDropped.includes(parseInt(crn)))) {
+					} else if (app.user.position == 'Student' && (course.registered != null && !includesString(app.user.university_id, course.registered) || app.user.tempDropped.includes(parseInt(crn)))) {
 						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="register" onclick="register(' + course.crn + ',' + course.capacity + ',' + '\'' + course.registered + '\'' + ',\'false\'' + ',' + course.waitlist_count + ')">Register</button></br><button type="button" onclick="addToWishlist(' + course.crn + ')">Add to Wishlist</button>';
                                         	additionalInfo = additionalInfo + '<div> <p> <b> Course Description: </b>' + course.description + '</p></div>';
                                         	additionalInfo = additionalInfo + '<p> <b> Times: </b>' + course.times  + '</p> </td></tr>';
-					} else if (app.user.position == 'Student' && (course.registered.includes(app.user.university_id))|| app.user.tempRegistered.includes(parseInt(crn))) {
+					} else if (app.user.position == 'Student' && (includesString(app.user.university_id, course.registered)|| app.user.tempRegistered.includes(parseInt(crn)))) {
 						additionalInfo = '<tr id="addInfo"><td colspan="12"> <br/> <button type="button" id="drop" onclick="register(' + course.crn + ',' + course.capacity + ',\'' + course.registered + '\',true' + ',' + course.waitlist_count + ')">Drop</button>';
 	                                        additionalInfo = additionalInfo + '<div> <p>Course Description: ' + course.description + '</p></div>';
         	                                additionalInfo = additionalInfo + '<p>' + course.times  + '</p> </td></tr>';
@@ -360,7 +361,7 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 				var drop =  '<button type="button" id="drop" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'true\'' + ',' + waitlist_count + ')">Drop</button></td></tr>';
 				$('#register').replaceWith(drop);
 				if ((typeof otherID) == 'undefined') {
-					if (app.user.tempDropped.includes(crn)) {
+					if (includesString(crn, app.user.tempDropped.split(','))) {
                                         	app.user.tempDropped.splice(app.user.tempDropped.indexOf(crn), 1);
                                 	}
                                 	app.user.tempWaitlisted.push(crn);
@@ -376,7 +377,7 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 				} else if (app.user.tempWaitlisted.includes(parseInt(crn))) {
 					app.user.tempWaitlisted.splice(app.user.tempWaitlisted.indexOf(crn), 1);
 					theCourse.waitlist_count = parseInt(theCourse.waitlist_count) - 1;
-				} else if (theCourse.registered.includes('W' + app.user.university_id)) {
+				} else if (includesString(('W' + app.user.university_id), theCourse.registered)) {
 					theCourse.waitlist_count = parseInt(theCourse.waitlist_count) - 1;
 				} else {
 					theCourse.registeredCount = theCourse.registeredCount - 1;
@@ -425,7 +426,8 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
                                                 		course = app.courses[i];
                                         		}
                                 		}
-
+console.log('course.registered: ' + course.registered);
+console.log('temp registered: ' + app.user.tempRegistered);
 						if (course.registered.includes('W' + university_id)) {
                                         		row.style.backgroundColor = 'yellow';
 						} else if (app.user.tempRegistered.includes(parseInt(newcrn))) {
@@ -440,7 +442,7 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 							row.style.backgroundColor = '#f2f2f2';
 						} else if (crn == newcrn && res.data == 'waitlisted') {
 							row.style.backgroundColor = 'yellow';
-						} else if (course.registered.includes(university_id)) {
+						} else if (includesString(university_id, course.registered)) {
 							row.style.backgroundColor = 'green';
 						} else {
 							row.style.backgroundColor = '#f2f2f2';
@@ -477,6 +479,16 @@ function findCourseByCrn(crn) {
 			return app.courses[i];
 		}
 	}
+}
+
+function includesString(smallStr, bigStr) {
+	var split = bigStr.split(',');
+	for (var i = 0; i < split.length; i++) {
+		if (split[i] == smallStr) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function findFirstWaitlisted(crn) {
