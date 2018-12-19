@@ -142,7 +142,6 @@ function logIn() {
 
 	socket.on('updateRegistered', (data) => {
 		var course = findCourseByCrn(data.crn);
-		console.log(course);
 		course.registeredCount = data.registeredCount;
 		course.waitlist_count = data.waitlist_count;
 
@@ -158,25 +157,13 @@ function logIn() {
 		//var el = $('td:contains("' + data.crn + '")').parent();
 		//el.css('background-color', 'green');
 
-		var notification = '<p id="notification">' + app.user.university_id + ' has been moved from the waitlist to registered for course: ' + 'data.crn' + '!</p>'
-		$('#invalidLogin').append(notification);
+		var notification = '<h3 id="notification">User ' + app.user.university_id + ' has been moved from the waitlist to registered for course: ' + data.crn + '!</h3>'
+		$('#searchBox').prepend(notification);
 
 		setTimeout(function () {
         		$('#notification').hide();
-    		}, 10000);
+    		}, 15000);
         });
-
-        /*socket.on('UpdateClientCount', (data) => {
-                var client_count = document.getElementById('client_count');
-                client_count.textContent = 'Number of clients: ' + data;
-        });
-
-        socket.on('ChatMessage', (data) => {
-                var message = document.getElementById('message');
-                var next = document.createElement('li');
-                next.textContent = data;
-                message.appendChild(next);
-        });*/
 }
 
 function search() {
@@ -361,7 +348,7 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 				var drop =  '<button type="button" id="drop" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'true\'' + ',' + waitlist_count + ')">Drop</button></td></tr>';
 				$('#register').replaceWith(drop);
 				if ((typeof otherID) == 'undefined') {
-					if (includesString(crn, app.user.tempDropped.split(','))) {
+					if (app.user.tempDropped.includes(crn)) {
                                         	app.user.tempDropped.splice(app.user.tempDropped.indexOf(crn), 1);
                                 	}
                                 	app.user.tempWaitlisted.push(crn);

@@ -402,25 +402,6 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('notifyRegistered', (data) => {
-		socket.emit('notifyRegistered', data);
+		io.emit('notifyRegistered', data);
 	});
 });
-
-/*
-
-ioserver = io(server);
-var num_clients = 0;
-ioserver.on('connection', (client) => {
-        num_clients++;
-        ioserver.emit('UpdateClientCount', num_clients);
-        client.on('disconnect', () => {
-                num_clients--;
-                ioserver.emit('UpdateClientCount', num_clients);
-        });
-        client.on('ChatMessage', (message) => {
-                ioserver.emit('ChatMessage', message);
-        })
-});
-
-*/
-

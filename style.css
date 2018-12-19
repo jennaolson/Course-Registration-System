@@ -49,6 +49,10 @@ table {
 	visibility: hidden;
 }
 
+#notification {
+
+}
+
 .pics {
   	display: flex;
 	align-items: center;
