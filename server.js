@@ -113,9 +113,9 @@ db.serialize(() => {
 					for (var m = 0; m < elementLocations.length; m++) {
 						if (elementLocations[m].innerHTML.includes('Online')) {
 							buildings.push('Online');
-							rooms.push('NULL');
+							rooms.push('');
 						} if (elementLocations[m].innerHTML.includes('No Room')) {
-							buildings.push('NULL');
+							buildings.push('');
 							rooms.push('No Room');
 						}
 						else {
