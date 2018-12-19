@@ -45,6 +45,13 @@ db.serialize(() => {
 			departmentSubjects.push(subject);
 
 			var course_name = subjects.getElementsByTagName("label")[i].textContent;
+			
+			if (course_name.includes("&amp;")){
+				course_name = course_name.replace("&amp;", "&");
+        		}
+        		if (course_name.includes("&#39;")){
+				course_name = course_name.replace("&#39;", "'");
+        		}
 
 			stmt.run(subject, course_name);
 		}
