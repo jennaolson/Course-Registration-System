@@ -157,6 +157,9 @@ function logIn() {
 		//var el = $('td:contains("' + data.crn + '")').parent();
 		//el.css('background-color', 'green');
 
+		var course = findCourseByCrn(data.crn);
+		course.waitlist_count = parseInt(course.waitlist_count) - 1;
+
 		var notification = '<h3 id="notification">User ' + app.user.university_id + ' has been moved from the waitlist to registered for course: ' + data.crn + '!</h3>'
 		$('#searchBox').prepend(notification);
 
@@ -344,6 +347,7 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 					app.user.tempRegistered.push(crn);
 				}
 				theCourse.registeredCount = parseInt(theCourse.registeredCount) + 1;
+				
 			} else if (res.data == 'waitlisted') {
 				var drop =  '<button type="button" id="drop" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'true\'' + ',' + waitlist_count + ')">Drop</button></td></tr>';
 				$('#register').replaceWith(drop);
