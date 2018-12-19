@@ -1,5 +1,3 @@
-
-
 var app;
 var socket;
 
@@ -44,6 +42,7 @@ function Init() {
 }
 
 function fullPage() {
+	$('#invalidLogin').css('visibility', 'hidden');
 	var box = document.getElementById('box');
         box.style.display = 'none';
         var newBox = document.getElementById('new');
@@ -68,9 +67,8 @@ function newUser() {
 		return;
 	}
 	$('#NaN').css('visibility', 'hidden');
-
 	axios.post('/checkUser', {
-		username: university_id,
+		username: parseInt(university_id),
 	}).then((res) => {
 		if (res.data === false) {
 			$('#invalidLogin').css('visibility', 'visible');
@@ -141,11 +139,32 @@ function logIn() {
         socket.on('connect', () => {
                 console.log('Connection successful!');
         });
-	socket.on('updateRegistered', (crn) => {
-		console.log(crn);
-		var el = $('div:contains("' + crn + '")');
-		console.log(el);
+
+	socket.on('updateRegistered', (data) => {
+		var course = findCourseByCrn(data.crn);
+		console.log(course);
+		course.registeredCount = data.registeredCount;
+		course.waitlist_count = data.waitlist_count;
+
+		// Update roster
+		if (app.user.tempRegistered.length > 0) {
+			for (var i = 0; i < app.user.tempRegistered.length; i++) {
+				course.registered = course.registered + app.user.tempRegistered[i] + ',';
+			}
+		}
 	});
+
+	socket.on('notifyRegistered', (data) => {
+		var el = $('div:contains("' + data.crn + '")');
+                el.css('background-color', 'green');
+
+		var notification = '<p id="notification">You have been moved from the waitlist to registered for course: ' + 'data.crn' + '!</p>'
+		$('#ust').append(notification);
+
+		setTimeout(function () {
+        		$('#notification').hide();
+    		}, 2000);
+        });
 
         /*socket.on('UpdateClientCount', (data) => {
                 var client_count = document.getElementById('client_count');
@@ -158,7 +177,6 @@ function logIn() {
                 next.textContent = data;
                 message.appendChild(next);
         });*/
-
 }
 
 function search() {
@@ -183,7 +201,6 @@ function search() {
 	}).then((res) => {
 		for (var i = 0; i < res.data.length; i++) {
 			for (var j = 0; j < res.data[i].length; j++) {
-
 				// Calculate registered Count
                 		var split = res.data[i][j].registered.split(',');
                 		var courses = [];
@@ -216,7 +233,9 @@ function search() {
 					registeredCount: registeredCount,
 					waitlist_count: res.data[i][j].waitlist_count,
 				});
+
 			}
+		console.log(app.courses);
 		}
 	}).then(() => {
 		$('#courseTable tr').each((index, row) => {
@@ -294,14 +313,8 @@ function search() {
 	}).catch(err => {
 		console.log(err);
 	});
-//	console.log('emitting updateRegistered');
-/*	socket.emit('updateRegistered', {
-		crn: crn,
-		course_number: course_number,
-		departments: departments
-	}); */
 }
-
+// registered undefined
 function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 	axios.post('/register', {
 		university_id: app.user.university_id,
@@ -313,6 +326,23 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 		otherID: otherID,
 	}).then((res) => {
 			var theCourse = findCourseByCrn(crn);
+			// Get RegisteredCount
+			var split = theCourse.registered.split(',');
+                        var users = [];
+                        for (var k = 0; k < split.length; k++) {
+                                if (split[k] != '' && split[k] != 'null' && !split[k].includes('undefined')) {
+                                        if (split[k].includes('W') || users.includes(split[k]) || split[k].includes(null)) {
+                                                //courses.push(split[k].substring(1));
+                                        } else {
+                                                users.push(split[k]);
+                                        }
+                                }
+			}
+
+			theCourse.registeredCount = users.length;
+			//if (app.user.tempRegistered.includes(crn)) theCourse.registeredCount--;
+			if (app.user.tempDropped.includes(crn)) theCourse.registeredCount--;
+
 			if (res.data == 'error') {
 				var error = document.getElementById('alreadyRegistered');
                 	        error.style.visibility = 'visible';
@@ -325,7 +355,7 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
                                 	}
 					app.user.tempRegistered.push(crn);
 				}
-				theCourse.registeredCount = theCourse.registeredCount + 1;
+				theCourse.registeredCount = parseInt(theCourse.registeredCount) + 1;
 			} else if (res.data == 'waitlisted') {
 				var drop =  '<button type="button" id="drop" onclick="register(' + crn + ',' + capacity + ',\'' + registered + '\',\'true\'' + ',' + waitlist_count + ')">Drop</button></td></tr>';
 				$('#register').replaceWith(drop);
@@ -370,12 +400,18 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 
 					registerWaitlisted(crn, capacity, newRegistered, false, waitlist_count, user);
 					theCourse.waitlist_count = parseInt(theCourse.waitlist_count) - 1;
+
+					// Socket
+		                        console.log('emitting notifyRegistered');
+                		        socket.emit('notifyRegistered', {
+						university_id: user,
+                                		crn: crn,
+                        		});
 				}
 
 			} else if (res.data == 'timeConflict') {
 				$('#timeConflict').css('visibility', 'visible');
 			} else {}
-
 			// Update colors
 			$('#courseTable tr').each((index, row) => {
 				if (index != 0) {
@@ -412,9 +448,25 @@ function register(crn, capacity, registered, drop, waitlist_count, otherID) {
 			    		}
                         	}
                 	});
+
+                        // Socket
+                        console.log('emitting updateRegistered');
+                        socket.emit('updateRegistered', {
+                                crn: crn,
+                                registeredCount: theCourse.registeredCount,
+                                waitlist_count: theCourse.waitlist_count
+                        });
+
 	}).catch(err => {
                 console.log(err);
 		console.log(err.message);
+        });
+
+        console.log('emitting updateRegistered');
+        socket.emit('updateRegistered', {
+                crn: crn,
+		registered: registered,
+                waitlist_count: waitlist_count
         });
 }
 
@@ -540,6 +592,8 @@ function registerForAllWishlist() {
 	}).catch((err) => {
 		console.log(err);
 	});
+
+	app.user.wishlist = [];
 }
 
 function dropFromSchedule(el) {

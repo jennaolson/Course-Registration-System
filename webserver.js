@@ -44,13 +44,14 @@ app.post('/data', (req, res) => {
 });
 
 app.post('/checkUser', (req, res) => {
-
-	if (req.body.username = '') {
+console.log('user: ' + req.body.username + typeof req.body.username);
+	if (req.body.username == '') {
 		res.send('false');
 	} else {
-
-		var sql = 'SELECT * FROM People WHERE university_id= "' + req.body.username + '"';
+		var sql = 'SELECT * FROM People WHERE university_id="' + req.body.username + '"';
+console.log(sql);
 		db.all(sql, [], (err, rows) => {
+console.log('rows: ' + rows + ' ' + rows.length);
 			if (err) {
 				throw err;
 			}
@@ -174,7 +175,7 @@ app.post('/register', (req, res) => {
 		registeredCourses = result[1].registered;
 		times = result[1].times;
 
-		// GET ALL REGISTERED TIMES
+		// GET ALL REGISTERED TIMES (this takes 5ever and breaks the site with all data loaded)
         	var split = registeredString.split(',');
                 var courses = [];
                 var courseInfo = [];
@@ -188,11 +189,10 @@ app.post('/register', (req, res) => {
                                	}
                        	}
                 }
-
 		var allTimes = [];
                 for (var j = 0; j < courses.length; j++) {
                        	promises.push(new Promise(function(resolve, reject) {
-                               	var sql = 'SELECT times FROM Sections where crn="' + courses[j]  + '"';
+                               	var sql = 'SELECT times FROM Sections where crn="' + courses[j] + '"';
                                	db.all(sql, [], (err, rows) => {
                                        	if (err) {
                                                	throw err;
@@ -205,16 +205,17 @@ app.post('/register', (req, res) => {
                    	}));
                 }
 
-
-
                 Promise.all(promises).then(function(values) {
+
 			if (values.length > 0 && values[0].indexOf(times) != -1 && (drop == false || drop == 'false') && (!registered.includes('W' + username))) {
 				res.send('timeConflict');
 			} else {
 				if (drop == false || drop == 'false') {
 					var split3 = registeredString.split(',');
                                         var index3 = split3.indexOf('W' + crn);
-                                        registeredString = split3.slice(0, index3) + split3.slice(index3 + 1, split3.length);
+                                        if (index3 != -1) {
+						registeredString = split3.slice(0, index3) + split3.slice(index3 + 1, split3.length);
+					}
 
 		        		if (registeredString.includes(crn) && !registeredString.includes('W' + crn)) {
 						res.send('error');
@@ -222,7 +223,7 @@ app.post('/register', (req, res) => {
 						var split = registeredCourses.split(',');
 						var newSplit = [];
 						for (var i = 0; i < split.length; i++) {
-							if (split[i] != '' && split[i] != 'null' && !split[i].includes('undefined') && !split[i].includes('W')) {
+							if (split[i] != '' && split[i] != 'null' && !split[i].includes('null') && !split[i].includes('undefined') && !split[i].includes('W')) {
 								newSplit.push(split[i]);
 							}
 						}
@@ -396,10 +397,13 @@ app.post('/getWishlistData', (req, res) => {
 
 io.on('connection', function (socket) {
 	console.log('sockets console.log');
-/*	socket.on('updateRegistered', (data) => {
-		console.log(data);
-	});*/
-	//socket.emit('updateRegistered', 'sockets!!!');
+	socket.on('updateRegistered', (data) => {
+		io.emit('updateRegistered', data);
+	});
+
+	socket.on('notifyRegistered', (data) => {
+		socket.emit('notifyRegistered', data);
+	});
 });
 
 /*
